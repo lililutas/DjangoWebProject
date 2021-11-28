@@ -32,11 +32,14 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('admin/', admin.site.urls),
     path('pool/', views.pool, name='pool'),
-     path('links/', views.links, name='video'),
     path('registration', views.registration, name='registration'),
     path('blog/', views.blog, name='blog'),
     path('newpost/', views.newpost, name='newpost'),
+    path('shop/', views.shop, name='shop'),
+    path('shop/<str:parameter>/', views.shop, name='shop'),
     re_path(r'^(?P<parameter>\d+)/$', views.blogpost, name='blogpost'),
+   
+  
 ]
 
 

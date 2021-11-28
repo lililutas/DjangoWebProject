@@ -3,7 +3,6 @@ Definition of models.
 """
 
 from django.db import models
-
 # Create your models here.
 from datetime import datetime
 from django.contrib import admin
@@ -50,5 +49,63 @@ class Comment(models.Model):
 		verbose_name_plural = 'Комментарии к статьям блога'
 
 
+
+class Shop(models.Model):
+	name = models.TextField(verbose_name = 'Название товара')
+	short = models.TextField(verbose_name = 'Краткое описание', max_length = 200)
+	text = models.TextField(verbose_name = 'Описание товара')
+	price = models.IntegerField(verbose_name = 'Цена')
+	category = models.CharField(verbose_name = 'Категория',max_length = 300, choices = (
+		('cat1', 'Фигурки'),
+		('cat2', 'Значки'),
+		('cat3', 'Постеры')
+		))
+	image = models.FileField(default = 'temp.jpg', verbose_name = 'Путь к картинке')
+
+
+	def __str__(self):
+		return 'Товар %s: %s' % (self.id, self.name)
+
+	class Meta:
+		db_table = 'Goods'
+		ordering = ['id']
+		verbose_name = 'Товары'
+		verbose_name_plural = 'Товары'
+
+class Orders(models.Model):
+	holder = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = 'Покупатель')
+	isActive = models.BooleanField(verbose_name = 'В корзине')
+	
+
+
+	def __str__(self):
+		return 'Заказ %s' % (self.id)
+
+	class Meta:
+		db_table = 'Orders'
+		ordering = ['holder']
+		verbose_name = 'Заказы'
+		verbose_name_plural = 'Заказы'
+
+class SubOrders(models.Model):
+	order = models.ForeignKey(Orders, on_delete = models.CASCADE, verbose_name = 'Заказ')
+	product = models.ForeignKey(Shop, on_delete = models.CASCADE, verbose_name = 'Товар')
+	quantity = models.IntegerField(verbose_name = 'Количество')
+	
+
+
+	def __str__(self):
+		return 'Товар %s к заказу %s' % (self.product, self.order)
+
+	class Meta:
+		db_table = 'SubOrders'
+		ordering = ['order']
+		verbose_name = 'Товары'
+		verbose_name_plural = 'Товары заказа'
+
+
 admin.site.register(Blog)
 admin.site.register(Comment)
+admin.site.register(Shop)
+admin.site.register(Orders)
+admin.site.register(SubOrders)

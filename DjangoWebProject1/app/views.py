@@ -7,9 +7,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from .forms import MyRequestForm
 from django.contrib.auth.forms import UserCreationForm
+from django.core.paginator import Paginator
 from django.db import models
 from .models import Blog
 from .models import Comment
+from .models import Shop
 from .forms import CommentForm
 from .forms import BlogForm
 
@@ -22,7 +24,7 @@ def home(request):
         request,
         'app/index.html',
         {
-            'title':'Home Page',
+            'title':'Главная страница',
             'posts' : posts,
             'year':datetime.now().year,
         }
@@ -53,19 +55,6 @@ def about(request):
             'year':datetime.now().year,
         }
     )
-
-def links(request):
- 
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/links.html',
-        {
-            'title':'Видео',
-            'year':datetime.now().year,
-        }
-    )
-
 
 def pool(request):
     """Renders the request page."""
@@ -161,7 +150,7 @@ def blogpost(request, parameter):
         request,
         'app/blogpost.html',
         {
-            
+            'title': post.title,
             'post': post,
             'comments': comments,
             'form': form,
@@ -189,9 +178,39 @@ def newpost(request):
         request,
         'app/newpost.html',
         {
-            
+            'title': 'Новый пост',
             'blogform': blogform,
             'year':datetime.now().year,
         }
     )
-                                                          
+def shop(request, parameter = 'all'):
+    """Renders the shop page."""
+
+    search = request.GET.get('search')
+    if parameter == 'all': 
+        if search == None:
+            products = Shop.objects.all()
+        else:
+            products = Shop.objects.filter(name__contains=search)
+    else:
+        if search == None:
+            products = Shop.objects.filter(category=parameter)
+        else:
+            products = Shop.objects.filter(category=parameter, name__contains=search)
+    
+    if search == None:
+        paginator = Paginator(products, 6)
+    else:
+        paginator = Paginator(products, 100)
+    page = request.GET.get('page')
+    products = paginator.get_page(page)
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/shop.html',
+        {
+            'title':'Магазин',
+            'products': products,
+            'year':datetime.now().year,
+        }
+    )                                            

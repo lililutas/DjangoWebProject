@@ -1,8 +1,12 @@
 ﻿{% if user.is_authenticated %}
 <form id="logoutForm" action="/logout/" method="post" class="navbar-right">
     {% csrf_token %}
-    <ul class="nav navbar-nav navbar-right">
-        <li><span class="navbar-brand pointer">Привет, {{ user.username }}!</span></li>
+    <ul class="nav navbar-nav navbar-right edited">
+        <li>
+            <button type="button" class="btn btn-dark btn-lg">
+              <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Корзина  <span class="badge">4</span>
+            </button>
+        </li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Выйти</a></li>
     </ul>
 </form>
