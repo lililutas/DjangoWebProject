@@ -126,7 +126,7 @@
 
                     <div class="buttons">
                         <a href="{#{% url 'products' parameter=product.id %}#}" class="btn btn-primary btn-news">Подробнее</a>
-                        <button type="button"  class="btn btn-success btn-buy">В корзину</button>
+                            <a href="{% url 'add_to_cart' %}?product={{ product.id }}" class="btn btn-success btn-buy"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span><span class="price">{{product.price}} &#8381;</span></a>
                     </div>
                 </div>
         </div>

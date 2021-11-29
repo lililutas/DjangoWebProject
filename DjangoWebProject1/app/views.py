@@ -8,10 +8,13 @@ from django.http import HttpRequest
 from .forms import MyRequestForm
 from django.contrib.auth.forms import UserCreationForm
 from django.core.paginator import Paginator
+from django.urls import reverse
 from django.db import models
 from .models import Blog
 from .models import Comment
 from .models import Shop
+from .models import Orders
+from .models import SubOrders
 from .forms import CommentForm
 from .forms import BlogForm
 
@@ -185,7 +188,6 @@ def newpost(request):
     )
 def shop(request, parameter = 'all'):
     """Renders the shop page."""
-
     search = request.GET.get('search')
     if parameter == 'all': 
         if search == None:
@@ -213,4 +215,91 @@ def shop(request, parameter = 'all'):
             'products': products,
             'year':datetime.now().year,
         }
-    )                                            
+    )       
+
+
+def total_price(request):
+    current_order, status = Orders.objects.get_or_create(holder=request.user, status='incart')
+    order_list = SubOrders.objects.filter(order=current_order)
+    current_order.total_price = 0
+    for item in order_list:
+        current_order.total_price += item.price
+
+    current_order.save()
+    return redirect(reverse('cart'))
+
+def add_to_cart(request):
+
+    current_product = Shop.objects.filter(id = request.GET.get('product')).first()
+    current_order, status = Orders.objects.get_or_create(holder=request.user, status='incart')
+    if status:
+        current_order.save()
+    suborder, status = SubOrders.objects.get_or_create(order=current_order, product=current_product)
+    if status: 
+        suborder.price = suborder.product.price * suborder.quantity
+        suborder.save()
+    else:
+        suborder.quantity += 1
+        suborder.price = suborder.product.price * suborder.quantity
+        suborder.save()
+    order_list = SubOrders.objects.filter(order=current_order)
+    current_order.total_price = 0
+    for item in order_list:
+        current_order.total_price += item.price
+
+    current_order.save()
+    assert isinstance(request, HttpRequest)
+    return redirect(reverse('shop'))
+
+def cart(request):
+    """Renders the cart page."""
+    current_order = Orders.objects.filter(holder=request.user, status='incart').first()
+    if current_order == None:
+        items = None
+    else:
+        items = SubOrders.objects.filter(order=current_order)
+        
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/cart.html',
+        {
+            'title':'Корзина',
+            'order': current_order,
+            'items': items,  
+            'year':datetime.now().year,
+        }
+    ) 
+
+def delete_item(request, item):
+    current_item = SubOrders.objects.get(id = item).delete()
+    return redirect(reverse('total_price'))
+
+def quantity_minus(request):
+    current_item = SubOrders.objects.filter(id = request.GET.get('item')).first()
+ 
+    current_item.quantity -= 1
+    if current_item.quantity == 0:
+        return redirect(reverse('delete_item', kwargs={'item': current_item.id}))
+    else:
+
+        current_item.price = current_item.product.price * current_item.quantity
+        current_item.save()
+    
+        return redirect(reverse('total_price'))
+
+def quantity_plus(request):
+    current_item = SubOrders.objects.filter(id = request.GET.get('item')).first()
+ 
+    current_item.quantity += 1
+    current_item.price = current_item.product.price * current_item.quantity
+    current_item.save()
+    
+    return redirect(reverse('total_price'))
+
+def deal_order(request):
+    current_order = Orders.objects.filter(holder=request.user, status='incart').first()
+    current_order.status = 'intransit'
+    current_order.save()
+    
+    return redirect(reverse('shop'))

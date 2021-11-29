@@ -35,8 +35,15 @@ urlpatterns = [
     path('registration', views.registration, name='registration'),
     path('blog/', views.blog, name='blog'),
     path('newpost/', views.newpost, name='newpost'),
+    path('cart/', views.cart, name='cart'),
     path('shop/', views.shop, name='shop'),
-    path('shop/<str:parameter>/', views.shop, name='shop'),
+    path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
+    path('delete_item/<int:item>/', views.delete_item, name='delete_item'),
+    path('quantity_minus/', views.quantity_minus, name='quantity_minus'),
+    path('quantity_plus/', views.quantity_plus, name='quantity_plus'),
+    path('total_price/', views.total_price, name='total_price'),
+    path('deal_order/', views.deal_order, name='deal_order'),
+    path('shop/<str:parameter>/', views.shop, name='shop'),            
     re_path(r'^(?P<parameter>\d+)/$', views.blogpost, name='blogpost'),
    
   

@@ -73,9 +73,14 @@ class Shop(models.Model):
 		verbose_name_plural = 'Товары'
 
 class Orders(models.Model):
+	STATUS = (
+		('incart', 'В корзине'),
+		('intransit', 'Доставляется'),
+		('delivered', 'Доставлен')
+	)
 	holder = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = 'Покупатель')
-	isActive = models.BooleanField(verbose_name = 'В корзине')
-	
+	status = models.CharField(verbose_name = 'Статус', choices = STATUS, max_length=300)
+	total_price = models.IntegerField(default = 0, verbose_name = 'Итоговая стоимость')
 
 
 	def __str__(self):
@@ -90,7 +95,8 @@ class Orders(models.Model):
 class SubOrders(models.Model):
 	order = models.ForeignKey(Orders, on_delete = models.CASCADE, verbose_name = 'Заказ')
 	product = models.ForeignKey(Shop, on_delete = models.CASCADE, verbose_name = 'Товар')
-	quantity = models.IntegerField(verbose_name = 'Количество')
+	quantity = models.IntegerField(default = 1, verbose_name = 'Количество')
+	price = models.IntegerField(default = 0, verbose_name = 'Стоимость товаров')
 	
 
 
