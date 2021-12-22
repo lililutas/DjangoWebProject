@@ -10,6 +10,30 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 
+#Роли пользователей
+class Roles(models.Model):
+	ROLES = (
+		('admin', 'Администратор'),
+		('moderator', 'Модератор'),
+		('client', 'Клиент')
+	)
+	user = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = 'Пользователь')
+	role = models.CharField(verbose_name = 'Роль', choices = ROLES, max_length=300, default = 'client')
+
+
+	def __str__(self):
+		return 'Роли'
+
+	class Meta:
+		db_table = 'Roles'
+		ordering = ['user']
+		verbose_name = 'Роли'
+		verbose_name_plural = 'Роли'
+
+
+
+
+#Новости
 class Blog(models.Model):
 	title = models.CharField(max_length = 100, unique_for_date = 'posted', verbose_name = 'Заголовок')
 	description = models.TextField(verbose_name = 'Краткое содержание')
@@ -31,7 +55,7 @@ class Blog(models.Model):
 		verbose_name_plural = 'Статьи блога'
 
 
-
+#Комментарии
 class Comment(models.Model):
 	text = models.TextField(verbose_name = 'Комментарий')
 	date = models.DateTimeField(default = datetime.now(), db_index = True, verbose_name = 'Дата')
@@ -49,16 +73,16 @@ class Comment(models.Model):
 		verbose_name_plural = 'Комментарии к статьям блога'
 
 
-
+#Товары
 class Shop(models.Model):
 	name = models.TextField(verbose_name = 'Название товара')
 	short = models.TextField(verbose_name = 'Краткое описание', max_length = 200)
 	text = models.TextField(verbose_name = 'Описание товара')
 	price = models.IntegerField(verbose_name = 'Цена')
 	category = models.CharField(verbose_name = 'Категория',max_length = 300, choices = (
-		('cat1', 'Фигурки'),
-		('cat2', 'Значки'),
-		('cat3', 'Постеры')
+		('cat_1', 'Фигурки'),
+		('cat_2', 'Значки'),
+		('cat_3', 'Постеры')
 		))
 	image = models.FileField(default = 'temp.jpg', verbose_name = 'Путь к картинке')
 
@@ -72,6 +96,7 @@ class Shop(models.Model):
 		verbose_name = 'Товары'
 		verbose_name_plural = 'Товары'
 
+#Заказы
 class Orders(models.Model):
 	STATUS = (
 		('incart', 'В корзине'),
@@ -92,6 +117,7 @@ class Orders(models.Model):
 		verbose_name = 'Заказы'
 		verbose_name_plural = 'Заказы'
 
+#Детали заказа
 class SubOrders(models.Model):
 	order = models.ForeignKey(Orders, on_delete = models.CASCADE, verbose_name = 'Заказ')
 	product = models.ForeignKey(Shop, on_delete = models.CASCADE, verbose_name = 'Товар')
@@ -115,3 +141,4 @@ admin.site.register(Comment)
 admin.site.register(Shop)
 admin.site.register(Orders)
 admin.site.register(SubOrders)
+admin.site.register(Roles)
